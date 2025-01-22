@@ -46,7 +46,7 @@ namespace GPUAV
 			pictureBox_waveform.Click += ImportAudios;
 		}
 
-		
+
 
 
 
@@ -122,7 +122,7 @@ namespace GPUAV
 
 			int id = (int) numericUpDown_id.Value - 1;
 
-			if(AudioH.Tracks[id].Player.PlaybackState == NAudio.Wave.PlaybackState.Playing)
+			if (AudioH.Tracks[id].Player.PlaybackState == NAudio.Wave.PlaybackState.Playing)
 			{
 				long current = AudioH.Tracks[id].GetCurrentSamplePosition();
 
@@ -182,7 +182,7 @@ namespace GPUAV
 			UpdateTrackView();
 
 			// Select first track
-			numericUpDown_id.Value = 1;
+			numericUpDown_id.Value = AudioH.Tracks.Count;
 		}
 
 		private void numericUpDown_offset_ValueChanged(object sender, EventArgs e)
@@ -192,6 +192,12 @@ namespace GPUAV
 
 		private void numericUpDown_id_ValueChanged(object sender, EventArgs e)
 		{
+			// Stop all tracks
+			foreach (TrackObject track in AudioH.Tracks)
+			{
+				track.Stop();
+			}
+
 			UpdateTrackView();
 		}
 
@@ -205,6 +211,7 @@ namespace GPUAV
 			// Abort if no Ctx
 			if (CudaH.Ctx == null)
 			{
+				MessageBox.Show("No CUDA context initialized", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return;
 			}
 
@@ -233,6 +240,7 @@ namespace GPUAV
 			// Falls kein Track ausgewählt ist
 			if (numericUpDown_id.Value == 0 || AudioH.Tracks.Count == 0)
 			{
+				MessageBox.Show("No track selected", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return;
 			}
 
@@ -281,9 +289,35 @@ namespace GPUAV
 			isSelecting = false;
 			long sampleIndex = (long) (numericUpDown_offset.Value + e.X * numericUpDown_zoom.Value);
 			selectionEnd = sampleIndex;
+
 			// Evtl. final neu zeichnen
 			pictureBox_waveform.Invalidate();
-			// Nun haben wir selectionStart / selectionEnd
+		}
+
+		private void button_stretch_Click(object sender, EventArgs e)
+		{
+			// If no track selected
+			if (numericUpDown_id.Value == 0 || AudioH.Tracks.Count == 0)
+			{
+				MessageBox.Show("No track selected", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
+
+			// Get index
+			int id = (int) numericUpDown_id.Value - 1;
+
+			// If no Pointer (is on Host)
+			if (AudioH.Tracks[id].Data.Length == 0)
+			{
+				MessageBox.Show("Track is empty or on CUDA device", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			}
+
+			// Do stretch -> Pointer
+			AudioH.Tracks[id].Data = CudaH.StretchSfft(AudioH.Tracks[id].Data, (float) numericUpDown_factor.Value);
+
+			// Update track view
+			UpdateTrackView();
 		}
 	}
 }

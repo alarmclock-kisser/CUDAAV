@@ -39,10 +39,15 @@
 			button_toCuda = new Button();
 			label_pointer = new Label();
 			button_playStop = new Button();
+			groupBox_fft = new GroupBox();
+			numericUpDown_factor = new NumericUpDown();
+			button_stretch = new Button();
 			((System.ComponentModel.ISupportInitialize) pictureBox_waveform).BeginInit();
 			((System.ComponentModel.ISupportInitialize) numericUpDown_id).BeginInit();
 			((System.ComponentModel.ISupportInitialize) numericUpDown_offset).BeginInit();
 			((System.ComponentModel.ISupportInitialize) numericUpDown_zoom).BeginInit();
+			groupBox_fft.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize) numericUpDown_factor).BeginInit();
 			SuspendLayout();
 			// 
 			// pictureBox_waveform
@@ -138,11 +143,45 @@
 			button_playStop.UseVisualStyleBackColor = true;
 			button_playStop.Click += button_playStop_Click;
 			// 
+			// groupBox_fft
+			// 
+			groupBox_fft.Controls.Add(button_stretch);
+			groupBox_fft.Controls.Add(numericUpDown_factor);
+			groupBox_fft.Location = new Point(492, 298);
+			groupBox_fft.Name = "groupBox_fft";
+			groupBox_fft.Size = new Size(200, 142);
+			groupBox_fft.TabIndex = 10;
+			groupBox_fft.TabStop = false;
+			groupBox_fft.Text = "CUDA FFT";
+			// 
+			// numericUpDown_factor
+			// 
+			numericUpDown_factor.DecimalPlaces = 8;
+			numericUpDown_factor.Increment = new decimal(new int[] { 1, 0, 0, 196608 });
+			numericUpDown_factor.Location = new Point(114, 113);
+			numericUpDown_factor.Maximum = new decimal(new int[] { 5, 0, 0, 0 });
+			numericUpDown_factor.Minimum = new decimal(new int[] { 5, 0, 0, 196608 });
+			numericUpDown_factor.Name = "numericUpDown_factor";
+			numericUpDown_factor.Size = new Size(80, 23);
+			numericUpDown_factor.TabIndex = 11;
+			numericUpDown_factor.Value = new decimal(new int[] { 10, 0, 0, 65536 });
+			// 
+			// button_stretch
+			// 
+			button_stretch.Location = new Point(6, 113);
+			button_stretch.Name = "button_stretch";
+			button_stretch.Size = new Size(75, 23);
+			button_stretch.TabIndex = 11;
+			button_stretch.Text = "Stretch";
+			button_stretch.UseVisualStyleBackColor = true;
+			button_stretch.Click += button_stretch_Click;
+			// 
 			// MainView
 			// 
 			AutoScaleDimensions = new SizeF(7F, 15F);
 			AutoScaleMode = AutoScaleMode.Font;
 			ClientSize = new Size(704, 681);
+			Controls.Add(groupBox_fft);
 			Controls.Add(button_playStop);
 			Controls.Add(label_pointer);
 			Controls.Add(button_toCuda);
@@ -162,6 +201,8 @@
 			((System.ComponentModel.ISupportInitialize) numericUpDown_id).EndInit();
 			((System.ComponentModel.ISupportInitialize) numericUpDown_offset).EndInit();
 			((System.ComponentModel.ISupportInitialize) numericUpDown_zoom).EndInit();
+			groupBox_fft.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize) numericUpDown_factor).EndInit();
 			ResumeLayout(false);
 			PerformLayout();
 		}
@@ -178,5 +219,8 @@
 		private Button button_toCuda;
 		private Label label_pointer;
 		private Button button_playStop;
+		private GroupBox groupBox_fft;
+		private Button button_stretch;
+		private NumericUpDown numericUpDown_factor;
 	}
 }

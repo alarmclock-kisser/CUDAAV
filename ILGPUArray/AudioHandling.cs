@@ -147,9 +147,9 @@ namespace GPUAV
 			Color waveformColor = Color.OrangeRed;
 			Color backgroundColor = Color.White;
 
-			Bitmap bmp = new Bitmap(wavebox.Width, wavebox.Height);
+			Bitmap bmp = new(wavebox.Width, wavebox.Height);
 			using Graphics gfx = Graphics.FromImage(bmp);
-			using Pen pen = new Pen(waveformColor);
+			using Pen pen = new(waveformColor);
 			gfx.SmoothingMode = SmoothingMode.AntiAlias;
 			gfx.Clear(backgroundColor);
 
