@@ -1,3 +1,5 @@
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
+
 namespace GPUAV
 {
 	public partial class MainView : Form
@@ -7,6 +9,12 @@ namespace GPUAV
 
 		public AudioHandling AudioH;
 		public CudaHandling CudaH;
+
+		public System.Windows.Forms.Timer PlaybackTimer;
+
+		private bool isSelecting = false;
+		private long selectionStart = 0;
+		private long selectionEnd = 0;
 
 
 
@@ -28,9 +36,17 @@ namespace GPUAV
 			AudioH = new AudioHandling();
 			CudaH = new CudaHandling(progressBar_vram, label_vram, comboBox_devices);
 
+			// Init. timer
+			PlaybackTimer = new System.Windows.Forms.Timer();
+			PlaybackTimer.Interval = 1;
+			PlaybackTimer.Tick += PlaybackTimer_Tick;
+			PlaybackTimer.Start();
+
 			// Register events
 			pictureBox_waveform.Click += ImportAudios;
 		}
+
+		
 
 
 
@@ -97,7 +113,33 @@ namespace GPUAV
 			pictureBox_waveform.Image = AudioH.Tracks[(int) numericUpDown_id.Value - 1].DrawWaveformSmooth(pictureBox_waveform, (long) numericUpDown_offset.Value, (int) numericUpDown_zoom.Value);
 		}
 
+		private void PlaybackTimer_Tick(object? sender, EventArgs e)
+		{
+			if (numericUpDown_id.Value == 0 || AudioH.Tracks.Count == 0)
+			{
+				return;
+			}
 
+			int id = (int) numericUpDown_id.Value - 1;
+
+			if(AudioH.Tracks[id].Player.PlaybackState == NAudio.Wave.PlaybackState.Playing)
+			{
+				long current = AudioH.Tracks[id].GetCurrentSamplePosition();
+
+				if (current < numericUpDown_offset.Maximum)
+				{
+					numericUpDown_offset.Value = current;
+				}
+				else
+				{
+					// Auto stop if end reached
+					numericUpDown_offset.Value = numericUpDown_offset.Maximum;
+					AudioH.Tracks[id].Stop();
+				}
+
+				UpdateTrackView();
+			}
+		}
 
 
 		// ~~~~~ ~~~~~ ~~~~~ EVENTS ~~~~~ ~~~~~ ~~~~~ \\
@@ -184,6 +226,64 @@ namespace GPUAV
 
 			// Update track view
 			UpdateTrackView();
+		}
+
+		private void button_playStop_Click(object sender, EventArgs e)
+		{
+			// Falls kein Track ausgewählt ist
+			if (numericUpDown_id.Value == 0 || AudioH.Tracks.Count == 0)
+			{
+				return;
+			}
+
+			// Get index
+			int id = (int) numericUpDown_id.Value - 1;
+
+			// If List-Object is already playing
+			if (AudioH.Tracks[id].Player.PlaybackState == NAudio.Wave.PlaybackState.Playing)
+			{
+				// Stop playing & update button text
+				button_playStop.Text = "Play";
+				AudioH.Tracks[id].Stop();
+				return;
+			}
+			else
+			{
+				// If not playing, start playing & update button text
+				button_playStop.Text = "Stop";
+				AudioH.Tracks[id].Play();
+			}
+		}
+
+		private void pictureBox_waveform_MouseDown(object sender, MouseEventArgs e)
+		{
+			// Hier umrechnen: Pixel -> Samples
+			long sampleIndex = (long) (numericUpDown_offset.Value + e.X * numericUpDown_zoom.Value);
+			isSelecting = true;
+			selectionStart = sampleIndex;
+			selectionEnd = sampleIndex;
+		}
+
+		private void pictureBox_waveform_MouseMove(object sender, MouseEventArgs e)
+		{
+			if (isSelecting)
+			{
+				long sampleIndex = (long) (numericUpDown_offset.Value + e.X * numericUpDown_zoom.Value);
+				selectionEnd = sampleIndex;
+				// Evtl. selektierten Bereich "live" darstellen
+				// Refresh oder Invalidate, damit im Paint-Event gezeichnet werden kann
+				pictureBox_waveform.Invalidate();
+			}
+		}
+
+		private void pictureBox_waveform_MouseUp(object sender, MouseEventArgs e)
+		{
+			isSelecting = false;
+			long sampleIndex = (long) (numericUpDown_offset.Value + e.X * numericUpDown_zoom.Value);
+			selectionEnd = sampleIndex;
+			// Evtl. final neu zeichnen
+			pictureBox_waveform.Invalidate();
+			// Nun haben wir selectionStart / selectionEnd
 		}
 	}
 }

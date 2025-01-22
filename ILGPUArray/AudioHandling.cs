@@ -60,6 +60,7 @@ namespace GPUAV
 		public double Duration;
 
 		public WaveOutEvent Player;
+		public RawSourceWaveStream? CurrentStream = null;
 
 		public long Pointer = 0;
 
@@ -200,31 +201,46 @@ namespace GPUAV
 
 		public void Play()
 		{
-			// If playing, stop
+			// Erst stoppen, falls schon am Laufen
 			if (Player.PlaybackState == PlaybackState.Playing)
 			{
 				Player.Stop();
 			}
 
-			// Create waveformat
 			WaveFormat waveFormat = new(Samplerate, Bitdepth, Channels);
-
-			// Create memory stream
 			MemoryStream memoryStream = new(GetBytes());
 
-			// Create raw source
-			RawSourceWaveStream rawSource = new(memoryStream, waveFormat);
+			// Hier den RawStream in CurrentStream speichern
+			CurrentStream = new RawSourceWaveStream(memoryStream, waveFormat);
+			Player.Init(CurrentStream);
 
-			// Init. player
-			Player.Init(rawSource);
-
-			// Play
 			Player.Play();
 		}
 
 		public void Stop()
 		{
 			Player.Stop();
+			Player.Dispose();
+			Player = new WaveOutEvent();
 		}
+
+		public long GetCurrentSamplePosition()
+		{
+			if (CurrentStream == null)
+			{
+				return 0;
+			}
+
+			if (Player.PlaybackState == PlaybackState.Playing)
+			{
+				long current = Player.GetPosition() / (Bitdepth / 8 * Channels);
+				return current;
+			}
+			else
+			{
+				return 0;
+			}
+		}
+
 	}
 }

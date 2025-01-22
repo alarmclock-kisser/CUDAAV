@@ -38,6 +38,7 @@
 			label_vram = new Label();
 			button_toCuda = new Button();
 			label_pointer = new Label();
+			button_playStop = new Button();
 			((System.ComponentModel.ISupportInitialize) pictureBox_waveform).BeginInit();
 			((System.ComponentModel.ISupportInitialize) numericUpDown_id).BeginInit();
 			((System.ComponentModel.ISupportInitialize) numericUpDown_offset).BeginInit();
@@ -127,11 +128,22 @@
 			label_pointer.TabIndex = 8;
 			label_pointer.Text = "[0] (currently on Host)";
 			// 
+			// button_playStop
+			// 
+			button_playStop.Location = new Point(12, 491);
+			button_playStop.Name = "button_playStop";
+			button_playStop.Size = new Size(75, 23);
+			button_playStop.TabIndex = 9;
+			button_playStop.Text = "Play";
+			button_playStop.UseVisualStyleBackColor = true;
+			button_playStop.Click += button_playStop_Click;
+			// 
 			// MainView
 			// 
 			AutoScaleDimensions = new SizeF(7F, 15F);
 			AutoScaleMode = AutoScaleMode.Font;
 			ClientSize = new Size(704, 681);
+			Controls.Add(button_playStop);
 			Controls.Add(label_pointer);
 			Controls.Add(button_toCuda);
 			Controls.Add(label_vram);
@@ -165,5 +177,6 @@
 		private Label label_vram;
 		private Button button_toCuda;
 		private Label label_pointer;
+		private Button button_playStop;
 	}
 }
